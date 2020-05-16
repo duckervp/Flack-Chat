@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/dcc0a8247b.js" crossorigin="anonymous"></script>
+
+    <!-- My CSS -->
+    <link rel="stylesheet" href="../static/css/main.css">
+
+    <title>Flack Chat</title>
+  </head>
+  <body>
+
+    <!-- Header -->
+    <header>
+      <h1>Flack Chat</h1>
+    </header>
+
+    <!-- Main -->
+    <main class="row">
+      
+      <!-- Left box -->
+      <div class="left-box col-3 bg-dark text-light">
+
+        <!-- User info -->
+        <div class="user-info">
+          <i class="fas fa-user"> User</i>
+          <p class="user-name">GHOST</p>
+        </div>
+  
+        <!-- Current room info -->
+        <div class="room-info">
+          <div class="room-name">
+            <span><i class="fas fa-door-open"> Current Room</i></span>
+            <p class="current-room">Data Science</p>
+          </div>
+          <div class="online-member">
+            <span><i class="fas fa-users"> Online Member</i></span>
+            <div class="member-container">
+              <p class="member-item">Flask</p>
+              <p class="member-item">SocketIO</p>
+              <p class="member-item">Django</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center box -->
+      <div class="center-box col-6">
+
+        <!-- Message container -->
+        <div class="message-container">
+          <div class="message-item">
+            <span class="state">Public</span>
+            <span class="username">GHOST</span>
+            <span class="time">02:02</span>
+            <p class="message">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Non, natus!</p>
+          </div>
+          <div class="message-item">
+            <span class="state">Private</span>
+            <span class="username">GHOST</span>
+            <span class="time">02:02</span>
+            <p class="message">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Non, natus!</p>
+          </div>
+        </div>
+
+        <!-- Message input form -->
+        <form class="message-input-form">
+          <button class="upload-file-btn"><i class="fas fa-arrow-circle-up"></i></button>
+          <input type="text" id="send_to" placeholder="Send to.." autocomplete="off">
+          <input type="text" id="message_input" placeholder="Message here.." autocomplete="off">
+          <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+        </form>
+      </div>
+
+      <!-- Right box -->
+      <div class="right-box col-3  bg-dark text-light">
+
+        <!-- Room list -->
+        <div class="room-container">
+          <span><i class="fas fa-door-closed"> Public Room</i></span>
+          <div class="room-list">
+            <p class="room-item">JavaScript</p>
+            <p class="room-item">Physic</p>
+            <p class="room-item">Data Science</p>
+            <p class="room-item">Loves</p>
+          </div>
+        </div>
+
+        <!-- Create room form -->
+        <form class="create-room-form">
+          <input type="text" id="room_name" placeholder="Room name.." autocomplete="off">
+          <button type="submit" class="create-room-btn"><i class="fas fa-plus-circle"></i></button>
+        </form>
+      </div>
+    </main>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <!-- SocketIO JS -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+
+    <!-- My JS -->
+    <script src="../static/js/main.js"></script>
+
+  </body>
+</html>

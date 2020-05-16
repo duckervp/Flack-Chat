@@ -1,0 +1,58 @@
+/* global */
+body {
+  padding: 0;
+  width: 100vw;
+  position: fixed;
+}
+
+.hide {
+  display: none;
+}
+
+input {
+  padding: 0 0.4rem;
+}
+
+/* header */
+header {
+  text-align: center;
+}
+
+/* main */
+main {
+  height: 90vh;
+  padding: 2% 12%;
+}
+
+main .left-box {
+  position: relative;
+  padding: 0.9375rem;
+}
+
+main .center-box {
+  position: relative;
+}
+
+main .center-box .message-input-form {
+  position: absolute;
+  bottom: 0;
+  width: 94.5%;
+  display: flex;
+  justify-content: space-between;
+}
+
+main .center-box .message-container {
+  overflow: auto;
+  max-height: 85vh;
+  padding-bottom: 4rem;
+}
+
+main .right-box {
+  position: relative;
+  padding: 0.9375rem;
+}
+
+main .right-box .create-room-form{
+  position: absolute;
+  bottom: 0.9375rem;
+}
