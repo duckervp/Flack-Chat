@@ -50,17 +50,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // On disconnect
   socket.on("disconnect", (data) => {
-    if (!data.user || !data.room) {
-      const username = data.user;
-      const leftRoom = data.room;
-      const time = new Date().toLocaleTimeString();
-      socket.emit("announceDisconnect", {
-        user: username,
-        room: leftRoom,
-        time: time,
-      });
-      socket.emit("requestRoomMember", { room: leftRoom });
-    }
+    const username = data.user;
+    const leftRoom = data.room;
+    const time = new Date().toLocaleTimeString();
+    socket.emit("announceDisconnect", {
+      user: username,
+      room: leftRoom,
+      time: time,
+    });
+    socket.emit("requestRoomMember", { room: leftRoom });
   });
 
   // Validate user and display to DOM
