@@ -8,27 +8,20 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.on("connect", () => {
     // Get username and room
     let username = localStorage.getItem("username");
-    // Verify the user
-    console.log("postUser");
 
+    // Verify the user
     socket.emit("postUser", { username });
 
     // Get all room
-    console.log("requestAllRoom");
-
     socket.emit("requestAllRoom");
 
     if (localStorage.getItem("room")) {
-      console.log("verifyRoom");
-
       // Verify room in case the room name at localstorage not exist on the server
       socket.emit("verifyRoom", { room: localStorage.getItem("room") });
     }
 
     // Modify create room form
     document.querySelector(".create-room-form").onsubmit = (e) => {
-      console.log("newRoomCreate");
-
       e.preventDefault();
       username = localStorage.getItem("username");
       const room = e.target.elements.room_name.value;
@@ -39,25 +32,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Modify send message form
     document.querySelector(".message-input-form").onsubmit = (e) => {
-      console.log("newMessageCreate");
-
       e.preventDefault();
       const state = "Public";
       username = localStorage.getItem("username");
       const time = new Date().toLocaleTimeString();
       const message = e.target.elements.message_input.value;
       room = localStorage.getItem("room");
-      console.log({ state, username, time, message, room });
       socket.emit("newMessage", { state, username, time, message, room });
       e.target.elements.message_input.value = "";
       e.target.elements.message_input.focus();
     };
   });
 
+  socket.on("Hello", () => {
+    console.log("HELLO");
+  });
+
+  // On disconnect
+  socket.on("disconnect", (data) => {
+    if (!data.user || !data.room) {
+      const username = data.user;
+      const leftRoom = data.room;
+      const time = new Date().toLocaleTimeString();
+      socket.emit("announceDisconnect", {
+        user: username,
+        room: leftRoom,
+        time: time,
+      });
+      socket.emit("requestRoomMember", { room: leftRoom });
+    }
+  });
+
   // Validate user and display to DOM
   socket.on("userResponse", (data) => {
-    console.log("userResponse");
-
     if (data.success) {
       localStorage.setItem("username", data.username);
       displayUser(data.username);
@@ -69,10 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Get back all public room and add to DOM
   socket.on("allRoomResponse", (data) => {
-    console.log("allRoomRessponse");
-
     removeAllRoom();
-
     data.forEach((room) => {
       addRoom(room);
     });
@@ -80,8 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // On verify room response
   socket.on("verifiedRoom", (data) => {
-    console.log("virifiedRoom");
-
     if (data.success) {
       const room = data["room"];
       const time = new Date().toLocaleTimeString();
@@ -90,9 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
         room: room,
         time: time,
       });
-      console.log("getCurrentRoomMSG");
 
       socket.emit("requestCurrentRoom", { room });
+      socket.emit("requestRoomMember", { room });
 
       setTimeout(() => {
         activeRoom(room);
@@ -104,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Get and display current room message to DOM
   socket.on("roomMessageResponse", (data) => {
-    console.log("roomMessageResponse");
     removeAllMessage();
     data.forEach((item) => {
       addMessage(item.state, item.user, item.time, item.message);
@@ -115,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // On create room response
   socket.on("newRoomResponse", (data) => {
-    console.log("newRoomResponse");
     if (data.success) {
       const username = data.user;
       const room = data.room;
@@ -125,14 +125,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // On room member response
+  socket.on("roomMemberResponse", (data) => {
+    document.querySelector(".member-container").innerHTML = "";
+    data.members.forEach((member) => {
+      addMember(member);
+    });
+  });
+
+  // On room member join response
+  socket.on("memberJoin", (data) => {
+    addMember(data.member);
+  });
+
+  // On room member leave response
+  socket.on("memberLeave", (data) => {
+    document.querySelectorAll(".member-item").forEach((item) => {
+      if (item.innerHTML == data.member) {
+        item.remove();
+      }
+    });
+  });
+
   // On create new message response
   socket.on("newMessageResponse", (data) => {
-    console.log("newMessageResponse");
     if (data.success) {
       const msg = data.msg;
-      console.log(msg.state, msg.user, msg.time, msg.message);
       addMessage(msg.state, msg.user, msg.time, msg.message);
-
       const messageList = document.querySelector(".message-container");
       messageList.scrollTop = messageList.scrollHeight;
     } else if (data.error == "room_null") {
@@ -144,20 +163,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Function add user to DOM
   function displayUser(username) {
-    console.log("displayUser");
     const username_p = document.querySelector(".user-name");
     username_p.innerHTML = username;
   }
 
   // Function remove all room from DOM
   function removeAllRoom() {
-    console.log("removeAllRoom");
     document.querySelector(".room-list").innerHTML = "";
   }
 
   // Function add room to DOM
   function addRoom(room) {
-    console.log("addRoom");
     const roomList = document.querySelector(".room-list");
     const roomItem = document.createElement("p");
     roomItem.innerHTML = room;
@@ -168,7 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem("username");
       const leftRoom = localStorage.getItem("room");
       const time = new Date().toLocaleTimeString();
-      console.log("leaveEvent");
 
       socket.emit("leave", {
         username: username,
@@ -179,10 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("room", room);
 
       socket.emit("join", { username: username, room: room, time: time });
-      console.log("joinEvent");
-
       socket.emit("requestCurrentRoom", { room });
-      console.log("requestRoomMSG");
+      socket.emit("requestRoomMember", { room });
 
       activeRoom(room);
     });
@@ -190,10 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Active room
   function activeRoom(room) {
-    console.log("activeRoom");
-
     document.querySelector(".current-room").innerHTML = room;
-
     document.querySelectorAll(".room-item").forEach((item) => {
       if (item.innerHTML == room) {
         item.classList.add("bg-info");
@@ -205,15 +215,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Function remove all Message from DOM
   function removeAllMessage() {
-    console.log("removeAllMessage");
     document.querySelector(".message-container").innerHTML = "";
   }
 
   // Function add message to DOM
   function addMessage(state, user, time, message) {
-    console.log("addMessage");
     const messageList = document.querySelector(".message-container");
-
     const messageItem = document.createElement("div");
     messageItem.innerHTML = `
     <span class="username">${user}</span>
@@ -223,5 +230,14 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     messageItem.classList.add("message-item");
     messageList.appendChild(messageItem);
+  }
+
+  // Function add room member to DOM
+  function addMember(member) {
+    const memberItem_p = document.createElement("p");
+    memberItem_p.innerHTML = member;
+    memberItem_p.classList.add("member-item");
+
+    document.querySelector(".member-container").appendChild(memberItem_p);
   }
 });

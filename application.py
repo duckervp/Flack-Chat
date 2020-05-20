@@ -17,18 +17,36 @@ MSGLIMIT = 100
 def index():
   return render_template("index.html")
 
-@socketio.on("connect")
-def onConnect():
-  print(f"{request.sid} has connected")
-
 @socketio.on("disconnect")
 def onDisconnect():
   d_user = ""
+  d_room = ""
   for user, sid in USERS.items():
     if sid == request.sid:
       d_user = user
+  for room in ROOMS:
+    for member in ROOMS[room]["members"]:
+      if member == d_user:
+        d_room = room
+        ROOMS[room]["members"].remove(member)
+        break
+    if d_room != "":
+      break
+  emit("disconnect", {"user":d_user, "room": d_room}, room=d_room)
+  print(f"{d_user} {request.sid} has disconnected")
 
-  print(f"{d_user} has disconnected")
+@socketio.on("announceDisconnect")
+def onAnnounceDisconnect(data):
+  if "room" in data and data["user"] is not None and data["user"] in USERS:
+    username = data["user"]
+    room = data["room"]
+    msg = {
+        "state": "Public",
+        "user": "FlackServer",
+        "time": data["time"],
+        "message": f"{username} has left the room."
+    }
+    emit("newMessageResponse", {"msg": msg, "success": True}, room=room) 
 
 @socketio.on("postUser")
 def onPostUser(data):
@@ -56,11 +74,19 @@ def onRequestCurrentRoom(data):
     currentRoomMessage = list(ROOMS[data["room"]]["messages"])
   emit("roomMessageResponse", currentRoomMessage)
 
+@socketio.on("requestRoomMember")
+def onRequestRoomMembers(data):
+  if "room" in data and data["room"] is not None and data["room"] in ROOMS:
+    members = ROOMS[data["room"]]["members"]
+    emit("roomMemberResponse", {"members": members})
+    print("requestRoomMember", members)
+
 @socketio.on("newRoom")
 def onNewRoom(data):
   if "room" in data and data["room"] not in ROOMS:
     ROOMS[data["room"]] = {}
     ROOMS[data["room"]]["messages"] = []
+    ROOMS[data["room"]]["members"] = []
     emit("newRoomResponse", {"room": data["room"], "user": data["username"], "success": True}, broadcast=True)
   else:
     emit("newRoomResponse", {"success": False})
@@ -90,27 +116,38 @@ def onJoin(data):
   username = data["username"]
   room = data["room"]
   join_room(room)
+  if username not in ROOMS[room]["members"]:
+    ROOMS[room]["members"].append(username)
   msg = {
       "state": "Public",
       "user": "FlackServer",
       "time": data["time"],
       "message": f"{username} has joined."
   }
+  print(username, "joined", room)
+  emit("memberJoin", {"member": username}, room=room)
   emit("newMessageResponse", {"msg": msg, "success": True}, room=room)  
 
 @socketio.on("leave")
 def onLeave(data):
-  username = data["username"]
-  room = data["room"]
-  if room is not None:
-    leave_room(room)
-    msg = {
-        "state": "Public",
-        "user": "FlackServer",
-        "time": data["time"],
-        "message": f"{username} has left the room."
-    }
-    emit("newMessageResponse", {"msg": msg, "success": True}, room=room)
+  if data["username"] in USERS:
+    username = data["username"]
+    room = data["room"]
+    if room is not None:
+      leave_room(room)
+      for member in ROOMS[room]["members"]:
+        if member == username:
+          ROOMS[room]["members"].remove(member)
+      msg = {
+          "state": "Public",
+          "user": "FlackServer",
+          "time": data["time"],
+          "message": f"{username} has left the room."
+      }
+      print(room,"members:", ROOMS[room]["members"])
+
+      emit("memberLeave", {"member": username}, room=room)
+      emit("newMessageResponse", {"msg": msg, "success": True}, room=room)
 
 if __name__ == '__main__':
     socketio.run(app)
