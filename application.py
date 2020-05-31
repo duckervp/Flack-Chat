@@ -4,8 +4,9 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 # Init app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = b'dascvbzxvba!@*&^lguw;kb'
-socketio = SocketIO(app, always_connect=True, engineio_logger=True)
-app.debug = True
+socketio = SocketIO(app)
+# socketio = SocketIO(app, always_connect=True, engineio_logger=True)
+# app.debug = True
 
 # Global variable
 USERS = {}
