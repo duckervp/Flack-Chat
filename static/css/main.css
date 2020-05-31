@@ -1,17 +1,16 @@
 /* global */
-body {
+* {
+  box-sizing: border-box;
+  margin: 0;
   padding: 0;
+}
+
+body {
+  height: 100vh;
   width: 100vw;
   position: fixed;
 }
 
-.hide {
-  display: none;
-}
-
-input {
-  padding: 0 0.4rem;
-}
 
 /* header */
 header {
@@ -20,25 +19,54 @@ header {
 
 /* main */
 main {
-  height: 90vh;
-  padding: 2% 12%;
+  height: 90%;
+  padding: 0.4rem 2rem;
 }
 
+/* Left box */
 main .left-box {
-  position: relative;
+  background: #393e46;
   padding: 0.9375rem;
+  /* margin-right: 1rem; */
 }
 
+.room-info, .online-member {
+  margin-top: 4rem;
+}
+
+.user-name, .current-room, .member-item {
+  width: fit-content;
+  margin: 0 0 1rem 1rem;
+}
+
+/* Center box */
 main .center-box {
-  position: relative;
+  background: linear-gradient( #222831, #393e46);
+  scrollbar-color: rebeccapurple green;
+  scrollbar-width: thin;
 }
 
 main .center-box .message-input-form {
-  position: absolute;
-  bottom: 0;
-  width: 94.5%;
   display: flex;
-  justify-content: space-between;
+  position: absolute;  
+  bottom: 0.4rem;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.upload-file-btn {
+  margin-left: 0.4rem;
+  cursor: pointer;
+}
+
+.upload-file-btn, #send_to, #message_input {
+  margin-right: 1rem;
+}
+
+#message_input {
+  width: 25.5rem;
 }
 
 main .center-box .message-container {
@@ -47,12 +75,93 @@ main .center-box .message-container {
   padding-bottom: 4rem;
 }
 
+main .center-box .message-container .message-item {
+  width: fit-content;
+  max-width: 45%;
+  margin-bottom: 0.3rem;
+  padding: 0.4rem;
+}
+
+main .center-box .message-container .message-item .message {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 5px;
+  word-wrap: break-word;
+}
+
+main .center-box .message-container .message-item-center {
+  margin-left: 10rem;
+  max-width: unset;
+}
+
+main .center-box .message-container .message-item-center .message {
+  display: inline;
+}
+
+main .center-box .message-container .message-item-right {
+  padding-right: 1rem;
+  margin-left: auto;
+}
+
+main .center-box .message-container .message-item-right .message {
+  margin-left: auto;
+}
+
+/* Right box */
 main .right-box {
-  position: relative;
+  background: #393e46;
   padding: 0.9375rem;
 }
 
-main .right-box .create-room-form{
+main .right-box .create-room-form {
   position: absolute;
-  bottom: 0.9375rem;
+  bottom: 0.4rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.room-list {
+  margin-top: 0.4rem;
+}
+
+.room-item {
+  padding: 0.2rem 0.4rem;
+  border: none;
+  border-radius: 5px;
+}
+
+#room_name {
+  width: 15rem;
+  margin-right: 1rem;
+}
+
+/* Item */
+.hide {
+  display: none;
+}
+
+h1 {
+  margin: 0;
+  text-shadow: 0 0 3px #FF0000, 0 0 5px #0000FF;
+}
+
+p {
+  margin: 0;
+}
+
+input {
+  padding: 0.2rem 0.5rem;
+  border: none;
+  border-radius: 5px;
+}
+
+i {
+  padding: 0.4rem;
+}
+
+.image {
+  display: block;
+  width: 100%;
 }

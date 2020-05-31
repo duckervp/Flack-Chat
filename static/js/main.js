@@ -30,22 +30,65 @@ document.addEventListener("DOMContentLoaded", () => {
       e.target.elements.room_name.focus();
     };
 
+    // Upload image
+    document.querySelector("#files").addEventListener("change", e =>{
+      const file = e.target.files[0];
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        const arrayBuffer = fileReader.result;
+        let state = "Public";
+        const username = localStorage.getItem("username");
+        const room = localStorage.getItem("room");
+        const time = new Date().toLocaleTimeString();
+        const sendTo = document.getElementById("send_to").value;
+        if (sendTo != "All Room") {
+          state = "Private";
+        }
+        const img = {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          binary: arrayBuffer
+        }
+
+        // Send an image as message
+        socket.emit("newMessage", {
+          state,
+          username,
+          sendTo,
+          time,
+          message: img.binary,
+          room
+        });
+        document.getElementById("message_input").value = "";
+        document.getElementById("message_input").focus();
+      }
+    });
+
     // Modify send message form
     document.querySelector(".message-input-form").onsubmit = (e) => {
       e.preventDefault();
-      const state = "Public";
+      let state = "Public";
       username = localStorage.getItem("username");
       const time = new Date().toLocaleTimeString();
+      const sendTo = e.target.elements.send_to.value;
       const message = e.target.elements.message_input.value;
+      if (sendTo != "All Room") {
+        state = "Private";
+      }
       room = localStorage.getItem("room");
-      socket.emit("newMessage", { state, username, time, message, room });
+      socket.emit("newMessage", {
+        state,
+        username,
+        sendTo,
+        time,
+        message,
+        room
+      });
       e.target.elements.message_input.value = "";
       e.target.elements.message_input.focus();
     };
-  });
-
-  socket.on("Hello", () => {
-    console.log("HELLO");
   });
 
   // On disconnect
@@ -106,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.on("roomMessageResponse", (data) => {
     removeAllMessage();
     data.forEach((item) => {
-      addMessage(item.state, item.user, item.time, item.message);
+      addMessage(item.state, item.user, item.sendTo, item.time, item.message);
     });
     const messageList = document.querySelector(".message-container");
     messageList.scrollTop = messageList.scrollHeight;
@@ -149,9 +192,11 @@ document.addEventListener("DOMContentLoaded", () => {
   socket.on("newMessageResponse", (data) => {
     if (data.success) {
       const msg = data.msg;
-      addMessage(msg.state, msg.user, msg.time, msg.message);
+      addMessage(msg.state, msg.user, msg.sendTo, msg.time, msg.message);
       const messageList = document.querySelector(".message-container");
       messageList.scrollTop = messageList.scrollHeight;
+    } else if (data.error == "member_not_exist") {
+      alert("Member you want to send private message does not exist.");
     } else if (data.error == "room_null") {
       alert("Enter a room to start chat.");
     } else {
@@ -204,9 +249,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector(".current-room").innerHTML = room;
     document.querySelectorAll(".room-item").forEach((item) => {
       if (item.innerHTML == room) {
-        item.classList.add("bg-info");
+        item.classList.add("bg-primary");
       } else {
-        item.classList.remove("bg-info");
+        item.classList.remove("bg-primary");
       }
     });
   }
@@ -217,16 +262,52 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Function add message to DOM
-  function addMessage(state, user, time, message) {
+  function addMessage(state, user, sendTo, time, message) {
     const messageList = document.querySelector(".message-container");
     const messageItem = document.createElement("div");
-    messageItem.innerHTML = `
-    <span class="username">${user}</span>
-      <span class="state">${state}</span>
-      <span class="time">${time}</span>
-      <p class="message">${message}</p>
-    `;
     messageItem.classList.add("message-item");
+    let color = "primary";
+    let receiver = sendTo;
+    if (!sendTo || sendTo == "All Room") {
+      receiver = "";
+    } else if (sendTo == localStorage.getItem("username")) {
+      receiver = "to Me";
+    } else {
+      receiver = `to ${sendTo}`;
+    }
+    if (state == "Public") {
+      if (user == "FlackServer") {
+        // color = "secondary";
+        color = "";
+        messageItem.classList.add("message-item-center");
+      } else if (user == localStorage.getItem("username")) {
+        messageItem.classList.add("message-item-right");
+      } else {
+        messageItem.classList.add("message-item-left");
+      }
+    } else {
+      color = "success";
+      if (user == localStorage.getItem("username")) {
+        messageItem.classList.add("message-item-right");
+      } else {
+        messageItem.classList.add("message-item-left");
+      }
+    }
+    if (message.search("data:image/jpeg;base64,") == -1) {
+      messageItem.innerHTML = `
+        <span class="username">${user}</span>
+        <span class="sendTo bg-danger">${receiver}</span>
+        <span class="time">${time}</span>
+        <p class="message bg-${color}">${message}</p>
+      `;
+    } else {
+      messageItem.innerHTML = `
+        <span class="username">${user}</span>
+        <span class="sendTo bg-danger">${receiver}</span>
+        <span class="time">${time}</span>
+        <img src="${message}" class="message bg-${color} image">
+      `;
+    }
     messageList.appendChild(messageItem);
   }
 

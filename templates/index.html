@@ -29,7 +29,7 @@
     <main class="row">
       
       <!-- Left box -->
-      <div class="left-box col-3 bg-dark text-light">
+      <div class="left-box col-2 text-light">
 
         <!-- User info -->
         <div class="user-info">
@@ -53,7 +53,7 @@
       </div>
 
       <!-- Center box -->
-      <div class="center-box col-6">
+      <div class="center-box col-7 bg-dark text-light">
 
         <!-- Message container -->
         <div class="message-container">
@@ -61,15 +61,18 @@
 
         <!-- Message input form -->
         <form class="message-input-form">
-          <button class="upload-file-btn"><i class="fas fa-arrow-circle-up"></i></button>
-          <input type="text" id="send_to" placeholder="Send to.." autocomplete="off">
+          <label for="files" class="upload-file-btn">
+            <i class="fa fa-arrow-circle-up"></i>
+          </label>
+          <input type="file" id="files">
+          <input type="text" id="send_to" placeholder="Send to.." autocomplete="off" value="All Room">
           <input type="text" id="message_input" placeholder="Message here.." autocomplete="off">
           <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
         </form>
       </div>
 
       <!-- Right box -->
-      <div class="right-box col-3  bg-dark text-light">
+      <div class="right-box col-3 bg-dark text-light">
 
         <!-- Room list -->
         <div class="room-container">

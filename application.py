@@ -4,7 +4,7 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 # Init app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = b'dascvbzxvba!@*&^lguw;kb'
-socketio = SocketIO(app)
+socketio = SocketIO(app, always_connect=True, engineio_logger=True)
 app.debug = True
 
 # Global variable
@@ -43,6 +43,7 @@ def onAnnounceDisconnect(data):
     msg = {
         "state": "Public",
         "user": "FlackServer",
+        "sendTo": "All Room",
         "time": data["time"],
         "message": f"{username} has left the room."
     }
@@ -94,18 +95,32 @@ def onNewRoom(data):
 @socketio.on("newMessage")
 def onNewMessage(data):
   room = data["room"]
+  user = data["username"]
   message = data["message"]
+  sendTo = data["sendTo"]
+  state = data["state"]
   if room is not None and message != "":
     msg = {
-      "state": data["state"],
-      "user": data["username"],
+      "state": state,
+      "user": user,
+      "sendTo": sendTo,
       "time": data["time"],
       "message": message
     }
-    if room in ROOMS and len(ROOMS[room]["messages"]) == MSGLIMIT:
-      ROOMS[room]["messages"].pop(0) 
-    ROOMS[room]["messages"].append(msg)
-    emit("newMessageResponse", {"msg": msg, "success": True}, room=room)
+    if state == "Public":
+      if room in ROOMS and len(ROOMS[room]["messages"]) == MSGLIMIT:
+        ROOMS[room]["messages"].pop(0) 
+      ROOMS[room]["messages"].append(msg)
+      emit("newMessageResponse", {"msg": msg, "success": True}, room=room)
+    elif sendTo in ROOMS[room]["members"]:
+      if room in ROOMS and len(ROOMS[room]["messages"]) == MSGLIMIT:
+        ROOMS[room]["messages"].pop(0) 
+      ROOMS[room]["messages"].append(msg)
+      if (sendTo != user):
+        emit("newMessageResponse", {"msg": msg, "success": True}, room=USERS[user])
+      emit("newMessageResponse", {"msg": msg, "success": True}, room=USERS[sendTo])
+    else:
+      emit("newMessageResponse", {"success": False, "error": "member_not_exist"})  
   elif message == "":
     emit("newMessageResponse", {"success": False, "error": "message_null"})
   else:
@@ -121,6 +136,7 @@ def onJoin(data):
   msg = {
       "state": "Public",
       "user": "FlackServer",
+      "sendTo": "All Room",
       "time": data["time"],
       "message": f"{username} has joined."
   }
@@ -141,6 +157,7 @@ def onLeave(data):
       msg = {
           "state": "Public",
           "user": "FlackServer",
+          "sendTo": "All Room",
           "time": data["time"],
           "message": f"{username} has left the room."
       }
